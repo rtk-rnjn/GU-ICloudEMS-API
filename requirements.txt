@@ -1,0 +1,10 @@
+aiosqlite
+beautifulsoup4
+colorama
+fastapi
+isort
+numpy
+pandas
+selenium
+tabulate
+uvicorn

@@ -1,0 +1,8 @@
+{
+    "selenium_args": ["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage", "--headless"],
+    "login_page_endpoint": "https://gu.icloudems.com/corecampus/index.php",
+    "input_username_id": "useriid",
+    "input_password_id": "actlpass",
+    "login_button_id": "psslogin",
+    "external_javascript": "waitForDisappear.js"
+}
