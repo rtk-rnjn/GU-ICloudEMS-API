@@ -61,5 +61,4 @@ class APIPaths(TasksLoops):
         return {"message": "Found"} if results else {"message": "Not Found"}
 
     async def _GET_timetable(self, *, admission_number: str) -> dict:
-        data = await get_current_timetable(self.cursor, admission_number)
-        return data  # type: ignore
+        return await get_current_timetable(self.cursor, admission_number)
