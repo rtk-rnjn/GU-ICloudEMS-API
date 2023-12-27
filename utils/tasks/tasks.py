@@ -67,7 +67,7 @@ def resolve_datetime(dt: datetime.datetime) -> datetime.datetime:
         tomorrow = dt + datetime.timedelta(days=1)
         yesterday = dt - datetime.timedelta(days=1)
 
-        return dt + (tomorrow.utcoffset() - yesterday.utcoffset())
+        return dt + (tomorrow.utcoffset() - yesterday.utcoffset())  # type: ignore
     elif is_ambiguous(dt):
         return dt.replace(fold=1)
     else:
@@ -392,7 +392,7 @@ class Loop(Generic[LF]):
                 f"Expected coroutine function, received {coro.__class__.__name__}."
             )
 
-        self._error = coro
+        self._error = coro  # type: ignore
         return coro
 
     def _get_next_sleep_time(
@@ -407,18 +407,18 @@ class Loop(Generic[LF]):
         index = self._start_time_relative_to(now)
 
         if index is None:
-            time = self._time[0]
+            time = self._time[0]  # type: ignore
             tomorrow = now.astimezone(time.tzinfo) + datetime.timedelta(days=1)
             date = tomorrow.date()
         else:
-            time = self._time[index]
+            time = self._time[index]  # type: ignore
             date = now.astimezone(time.tzinfo).date()
 
         dt = datetime.datetime.combine(date, time, tzinfo=time.tzinfo)
         return resolve_datetime(dt)
 
     def _start_time_relative_to(self, now: datetime.datetime) -> Optional[int]:
-        for idx, time in enumerate(self._time):
+        for idx, time in enumerate(self._time):  # type: ignore
             start = now.astimezone(time.tzinfo)
             if time >= start.timetz():
                 return idx

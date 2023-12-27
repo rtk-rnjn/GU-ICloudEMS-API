@@ -22,5 +22,5 @@ class BaseClass(ABC):
         ...
 
     @abstractmethod
-    def start_loops(self) -> None:
+    async def start_loops(self) -> None:
         ...
