@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import pathlib
 from typing import TYPE_CHECKING, Final
 
@@ -30,6 +31,8 @@ js = js_path.read_text(encoding="utf-8", errors="strict")
 SELENIUM_ARGS: Final = config["selenium_args"]
 GU_ICLOUD_EMS_LOGIN: Final = config["login_page_endpoint"]
 
+logger = logging.getLogger(__name__)
+
 
 class WebDriver:
     def __init__(self, admission_number: str, password: str) -> None:
@@ -46,7 +49,10 @@ class WebDriver:
 
         self.__login_success = False
 
+        logger.info("initialized web driver")
+
     def _wait_for(self, cls_name: str, *, timeout: int = 10):
+        logger.debug("Waiting for element with class name: %s", cls_name)
         try:
             element = self.driver.find_element(By.CLASS_NAME, cls_name)
         except NoSuchElementException:
@@ -61,14 +67,22 @@ class WebDriver:
         wait.until(is_display_none)
 
     def wait_for_preloader(self) -> None:
-        class_name = "preloader-backdrop"
-        self._wait_for(class_name)
+        self.__wait_for("Waiting for preloader to disappear", "preloader-backdrop")
 
     def wait_for_swal(self) -> None:
-        class_name = "swal2-buttonswrapper swal2-loading"
+        self.__wait_for(
+            "Waiting for Swal to disappear", "swal2-buttonswrapper swal2-loading"
+        )
+
+    def __wait_for(self, log_info: str, cls_name: str):
+        logger.info(log_info)
+        class_name = cls_name
         self._wait_for(class_name)
 
     def login(self) -> FireFoxWebDriver:
+        logger.info("Logging in with admission number: %s", self.__admission_number)
+
+        logger.debug("Getting login page %s", GU_ICLOUD_EMS_LOGIN)
         self.driver.get(GU_ICLOUD_EMS_LOGIN)
 
         self._input_and_click(
@@ -94,7 +108,7 @@ class WebDriver:
         self.click_button()
         self.driver.execute_script(js)
 
-        self._wait_for("ONE MORE STUPID WAIT", timeout=30)
+        self._wait_for("ONE MORE STUPID WAIT", timeout=20)
 
         self.__login_success = True
         return self.driver
@@ -116,8 +130,11 @@ class WebDriver:
     def _input_and_click(
         self, element: WebElement, text: str, *, click_enter: bool = False
     ) -> None:
+        logger.debug("Sending keys %s to element %s", text, element.tag_name)
+        element.clear()
         element.send_keys(text)
         if click_enter:
+            logger.debug("Clicking enter on element %s", element.tag_name)
             element.send_keys(Keys.ENTER)
 
     def click_button(self) -> None:

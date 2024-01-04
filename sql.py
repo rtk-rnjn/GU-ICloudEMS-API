@@ -58,6 +58,10 @@ while True:
         clear()
         continue
 
+    if query.lower() in {"commit", "save"}:
+        con.commit()
+        continue
+
     result = parse_input(query)
     if isinstance(result, str):
         print(f"{Fore.RED}Error: {result}{Fore.RESET}")

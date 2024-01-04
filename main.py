@@ -1,11 +1,20 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 
 import uvicorn
 from fastapi import FastAPI
 
 from src.api import Router as APIRouter
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    datefmt="%m/%d/%Y %H:%M:%S",
+)
+
+logging.getLogger()
 
 
 async def main():

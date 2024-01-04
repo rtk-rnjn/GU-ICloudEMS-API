@@ -1,18 +1,16 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 
 from utils.tasks import tasks
 
 from .meta import MetaClass
 
+log = logging.getLogger("__name__")
+
 
 class TasksLoops(MetaClass):
-    @tasks.loop(seconds=5)
-    async def global_commit_cycle(self) -> None:
-        if hasattr(self, "database_connection"):
-            await self.database_connection.commit()
-
     @tasks.loop(hours=3)
     async def global_timetable_update(self) -> None:
         if not hasattr(self, "database_connection"):

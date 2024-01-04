@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 
 from src.web_driver.profile_driver import ProfileDriver
 from src.web_driver.time_table_driver import TimeTableDriver
@@ -9,15 +10,23 @@ from utils.html_parser import ProfileParser, TimeTableParser
 
 from .base import BaseClass
 
+log = logging.getLogger("__name__")
+
 
 class MetaClass(BaseClass):
     async def _update_profile(self, *, admission_number: str, password: str) -> None:
         profile = ProfileDriver(admission_number, password)
+        log.info("logging in with %s and %s", admission_number, password)
+
         await asyncio.to_thread(profile.login)
-        await self.cursor.execute(
-            ProfileParser(profile.download_page_source()).create_sql_query()
-        )
-        await asyncio.to_thread(profile.close)
+        query = ProfileParser(profile.download_page_source()).create_sql_query()
+        log.debug("executing sql query %s", query)
+        await self.cursor.execute(query)
+
+        log.info("committing changes")
+        await self.database_connection.commit()
+
+        profile.close()
 
     async def _update_timetable(self, admission_number: str, password: str) -> None:
         timetable = TimeTableDriver(admission_number, password)
@@ -26,9 +35,9 @@ class MetaClass(BaseClass):
         data = parser.get_data()
 
         functions = [
-            insert_main_timetable(self.cursor, **data["timetable"]),
+            insert_main_timetable(self.database_connection, **data["timetable"]),
             insert_alternative_arrangement(
-                self.cursor, **data["alternative_timetable"]
+                self.database_connection, **data["alternative_timetable"]
             ),
         ]
 
@@ -51,3 +60,5 @@ class MetaClass(BaseClass):
                     datetime(start_time) < datetime('now', '-7 days', '+5 hours', '+30 minutes');
             """
         )
+        log.info("committing changes")
+        await self.database_connection.commit()

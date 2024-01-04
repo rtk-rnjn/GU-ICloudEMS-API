@@ -38,7 +38,6 @@ class Router(APIPaths):
         if self.INIT:
             raise RuntimeError("Server already initialized")
 
-        self.global_commit_cycle.start()
         self.global_timetable_update.start()
 
     async def close(self) -> None:
@@ -65,6 +64,12 @@ class Router(APIPaths):
             lambda: {"message": "pong"},
             methods=["GET"],
             response_model=dict[str, str],
+        )
+        self.router.add_api_route(
+            "/commit",
+            self._GET_commit,
+            methods=["GET"],
+            response_model=self._GET_commit.__annotations__["return"],
         )
 
     def add_credentials_routes(self) -> None:

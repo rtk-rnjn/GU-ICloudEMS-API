@@ -24,10 +24,19 @@ try:
 except ImportError:
     HTML_PARSER = "html.parser"
 
+import logging
+
+log = logging.getLogger("__name__")
+
 
 class HTMLParser(ABC):
     def __init__(self, html_source: str) -> None:
         self.html_source = html_source
+        log.debug(
+            "creating soup object with %s with %s parser",
+            f"{html_source[:20:]}...{html_source[-20::]}",
+            HTML_PARSER,
+        )
         self.__soup = BeautifulSoup(html_source, HTML_PARSER)
 
     @property
@@ -99,7 +108,7 @@ class ProfileParser(HTMLParser):
         return data
 
     def create_sql_query(self, semicolon: bool = False) -> str:
-        query = """INSERT INTO students ({}) VALUES ({}) ON CONFLICT DO NOTHING RETURNING id"""
+        query = """INSERT INTO students ({}) VALUES ({}) ON CONFLICT DO NOTHING"""
         data = self.get_data()
         columns = ", ".join(data.keys())
         values = ", ".join(
